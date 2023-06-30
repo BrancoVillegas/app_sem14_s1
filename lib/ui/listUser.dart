@@ -1,5 +1,6 @@
 import 'package:app_sem14_s1/ui/newUser.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as dr;
+import 'package:app_sem14_s1/ui/userEditDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:app_sem14_s1/database/database.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,13 @@ class listUser extends StatefulWidget {
 class _listUserState extends State<listUser> {
 
   late AppDatabase database;
+  UserEditDialog ? dialog;
+
+  @override
+  void initState() {
+    super.initState();
+    dialog = UserEditDialog();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +37,66 @@ class _listUserState extends State<listUser> {
             List<User>? userList = snapshot.data;
             return ListView.builder(
               itemCount: userList!.length,
-                  itemBuilder: (context,index){
-                  User userData = userList[index];
-                  return ListTile(
+              itemBuilder: (context, index){
+                User userData = userList[index];
+                return Dismissible(
+                  key: Key(userData.id.toString()),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: const Icon(Icons.delete_outline_rounded, color: Colors.white,),
+                  ),
+                  secondaryBackground: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: const Icon(Icons.delete_outline_rounded, color: Colors.white)
+                  ),
+                  onDismissed: (direction) async {
+                    await database.deleteUser(UsersCompanion(
+                      id: dr.Value(userData.id),
+                      nombre: dr.Value(userData.nombre),
+                      correo: dr.Value(userData.correo),
+                    )).then((value) => {
+                      userList.removeAt(index),
+                      setState(() {}),
+                    });
+                    //make a snack bar with the undo button
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Usuario eliminado'),
+                        action: SnackBarAction(
+                          label: 'Deshacer',
+                          onPressed: () async {
+                            await database.insertUser(UsersCompanion(
+                              nombre: dr.Value(userData.nombre),
+                              correo: dr.Value(userData.correo),
+                            )).then((value) => {
+                              setState(() {}),
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  child: ListTile(
                     title: Text(userData.nombre),
                     subtitle: Text(userData.correo),
-                  );
-                },
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: (){
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => dialog!.buildDialog(context, userData)).then((value) => {
+                          setState(() {})
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
             );
-
           }
           else if(snapshot.hasError){
             return Center(
@@ -45,35 +104,26 @@ class _listUserState extends State<listUser> {
             );
           } else {
             return const Center(
-              child: Text(""),
+              child: CircularProgressIndicator(),
             );
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          addUser();
-        },
+        onPressed: addUser,
         backgroundColor: Colors.black54,
-        child: Icon(
-          Icons.plus_one,
-          color: Colors.white10,
-        ),
+        child: const Icon(Icons.plus_one, color: Colors.white,),
       ),
     );
-    return const Placeholder();
   }
 
-  void addUser() async {
+  void addUser() async{
     var res = await Navigator.push(
       context, MaterialPageRoute(
-        builder: (context)=> newUser()),
-    );
-
-    if(res !=null && res == true){
-      setState(() {
-
-      });
-    }
+        builder: (context) => newUser()
+    ),
+    ).then((value) => {
+      setState(() {})
+    });
   }
 }

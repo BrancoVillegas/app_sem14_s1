@@ -26,39 +26,43 @@ class _newUserState extends State<newUser> {
   @override
   Widget build(BuildContext context) {
     database = Provider.of<AppDatabase>(context);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
+          icon: const Icon(Icons.chevron_left),
           onPressed: (){
             Navigator.pop(context);
           },
-          icon: Icon(
-          Icons.chevron_left),
         ),
         title: Text('Usuario Nuevo'),
       ),
       body: Column(
         children: [
-          TextFormField(
-            controller: txtNombre,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: txtNombre,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20)
+                ),
+                hintText: "Ingrese Nombre",
               ),
-              hintText: "Ingrese Nombre",
             ),
           ),
           SizedBox(
             height: 30,
           ),
-          TextFormField(
-            controller: txtCorreo,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: txtCorreo,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20)
+                ),
+                hintText: "Ingrese Correo",
               ),
-              hintText: "Ingrese Correo",
             ),
           ),
           SizedBox(
